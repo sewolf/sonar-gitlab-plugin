@@ -1,61 +1,52 @@
-image: docker.mamdev.server.lan/internal/mamido/ci-runner:latest
-
-# automatically move artifacts,
-# resolve MAMDEVQA-Ticket
-variables:
-  CREATE_MAMDEVQA_DUMP_JSON: "true"
-
-Verify Branches:
-  script:
-    - npm install
-    - npm test
-    - npm run build
-    - mvn-branch-sonar-comments
-  except:
-    - master@iscomp/sonar-gitlab-plugin
-    - tags@iscomp/sonar-gitlab-plugin
-
-Deploy Master and Tags:
-  script:
-    - npm install
-    - npm test
-    - npm run build
-    - mvn-master
-  only:
-    - master@iscomp/sonar-gitlab-plugin
-    - tags@iscomp/sonar-gitlab-plugin
-
-prepare release:
-  stage: deploy
+image: maven:3.3.3-jdk-8
+stages:
+  - build
+  - test
+  - deploy
+build_job:
+  stage: build
   only:
     - master
-  when: manual
   script:
-    - mvn-update-parent
-    - mvn -V -B -DpushChanges=false -Dmessage='Update PortalPom' scm:checkin
-    - npm install
-    - npm test
-    - npm run build
-    - mvn-prepare-release -DcheckModificationExcludeList=pom.xml,package-lock.json
-
-deploy release:
-  stage: deploy
-  only:
+    - mvn --batch-mode compile -Dmaven.test.skip=true -Djacoco.skip=true
+  tags:
+    - docker
+build_merge_job:
+  stage: build
+  except:
+    - master
     - tags
   script:
-    - npm install
-    - npm test
-    - npm run build
-    - mvn-stage-release
-
-# Job for testing the SQ 7.9 installation
-Test SonarQube7.9 QA:
-  image: docker.mamdev.server.lan/internal/mamido/ci-runner-base-adoptopenjdk11:stretch
+    - git merge origin master --no-commit --no-ff
+    - mvn --batch-mode compile -Dmaven.test.skip=true -Djacoco.skip=true
+  tags:
+    - docker
+test_sonar_preview_job:
   stage: test
+  except:
+    - master
+    - tags
   script:
-    - mvn -B -V verify sonar:sonar
-      -Ddependency-check.skip
-      -Dsonar.host.url=https://mam-sonar-qa-bs01.mamdev.server.lan -Dsonar.analysis.mode=publish
+    - git merge origin master --no-commit --no-ff
+    - mvn --batch-mode verify org.sonarsource.scanner.maven:sonar-maven-plugin:3.4.0.905:sonar -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.analysis.mode=preview -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME -Dsonar.gitlab.project_id=$CI_PROJECT_ID
+  tags:
+    - docker
+test_sonar_feature_job:
+  stage: test
+  except:
+    - master
+    - tags
+  script:
+    - git merge origin master --no-commit --no-ff
+    - mvn --batch-mode verify org.sonarsource.scanner.maven:sonar-maven-plugin:3.4.0.905:sonar -Dsonar.host.url=$SONAR_OFF_URL -Dsonar.login=$SONAR_OFF_LOGIN -Dsonar.branch.name=$CI_COMMIT_REF_NAME
+  tags:
+    - docker
+test_sonar_job:
+  stage: test
   only:
     - master
-  allow_failure: true
+  script:
+    - mvn --batch-mode verify org.sonarsource.scanner.maven:sonar-maven-plugin:3.4.0.905:sonar -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN
+    - mvn --batch-mode verify org.sonarsource.scanner.maven:sonar-maven-plugin:3.4.0.905:sonar -Dsonar.host.url=$SONAR_OFF_URL -Dsonar.login=$SONAR_OFF_LOGIN
+  tags:
+    - docker
