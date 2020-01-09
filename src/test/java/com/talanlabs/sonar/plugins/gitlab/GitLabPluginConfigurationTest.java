@@ -132,6 +132,8 @@ public class GitLabPluginConfigurationTest {
         Assertions.assertThat(config.qualityGateFailMode()).isEqualTo(QualityGateFailMode.ERROR);
         settings.setProperty(GitLabPlugin.GITLAB_QUALITY_GATE_FAIL_MODE, QualityGateFailMode.WARN.getMeaning());
         Assertions.assertThat(config.qualityGateFailMode()).isEqualTo(QualityGateFailMode.WARN);
+        settings.setProperty(GitLabPlugin.GITLAB_QUALITY_GATE_FAIL_MODE, QualityGateFailMode.NONE.getMeaning());
+        Assertions.assertThat(config.qualityGateFailMode()).isEqualTo(QualityGateFailMode.NONE);
         settings.setProperty(GitLabPlugin.GITLAB_QUALITY_GATE_FAIL_MODE, "error");
         Assertions.assertThat(config.qualityGateFailMode()).isEqualTo(QualityGateFailMode.ERROR);
 
@@ -182,6 +184,10 @@ public class GitLabPluginConfigurationTest {
         Assertions.assertThat(config.loadRule()).isFalse();
         settings.setProperty(GitLabPlugin.GITLAB_LOAD_RULES, "true");
         Assertions.assertThat(config.loadRule()).isTrue();
+
+        Assertions.assertThat(config.isMergeRequestDiscussionEnabled()).isFalse();
+        settings.setProperty(GitLabPlugin.GITLAB_MERGE_REQUEST_DISCUSSION, "true");
+        Assertions.assertThat(config.isMergeRequestDiscussionEnabled()).isTrue();
     }
 
     @Test
