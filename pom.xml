@@ -3,18 +3,20 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
-    <groupId>org.sonarsource.parent</groupId>
-    <artifactId>parent</artifactId>
-    <version>40</version>
+    <groupId>com.unitedinternet.portal.maven2.pom</groupId>
+    <artifactId>portalpom3</artifactId>
+    <version>1.152</version>
   </parent>
+
   <groupId>com.talanlabs</groupId>
   <artifactId>sonar-gitlab-plugin</artifactId>
-  <version>4.1.0-SNAPSHOT</version>
+  <version>5.0.0-MAM</version>
   <name>SonarQube :: GitLab Plugin</name>
   <description>GitLab Plugin for Reporting</description>
   <packaging>sonar-plugin</packaging>
-  <url>https://github.com/gabrie-allaigre/sonar-gitlab-plugin</url>
+  <url>https://git.mamdev.server.lan/sewolf/sonar-gitlab-plugin</url>
   <properties>
     <java-gitlab-api.version>1.5.0</java-gitlab-api.version>
     <freemarker.version>2.3.23</freemarker.version>
@@ -23,22 +25,28 @@
     <license.mailto>gabriel.allaigre@gmail.com</license.mailto>
     <license.owner>Talanlabs</license.owner>
 
-    <sonar.version>7.9.1</sonar.version>
+    <sonar.version>7.9</sonar.version>
     <sonar.pluginName>GitLab</sonar.pluginName>
     <sonar.pluginClass>com.talanlabs.sonar.plugins.gitlab.GitLabPlugin</sonar.pluginClass>
-
-    <!-- used for deployment to SonarSource Artifactory -->
-    <gitRepositoryName>sonar-gitlab</gitRepositoryName>
-    <!-- Release: enable publication to Bintray -->
-    <artifactsToPublish>${project.groupId}:${project.artifactId}:jar</artifactsToPublish>
-
-    <jacoco-maven-plugin.version>0.7.5.201505241946</jacoco-maven-plugin.version>
-    <jacoco.ut.execution.data.file>${project.build.directory}/coverage-reports/jacoco-ut.exec
-    </jacoco.ut.execution.data.file>
-
-    <sonar.jacoco.reportPaths>${jacoco.ut.execution.data.file}</sonar.jacoco.reportPaths>
     <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
+
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+
+    <mamdevqaTelephone>4607</mamdevqaTelephone>
+    <mamdevqaYpUrl>https://tosm-jira.1and1.org/browse/YP-123456789</mamdevqaYpUrl>
+    <ypInformationSystemUrl>IS-NOT-NEEDED</ypInformationSystemUrl>
+    <uiSecureSoftwareDevelopmentUrl>SSDLC-NOT-NEEDED</uiSecureSoftwareDevelopmentUrl>
+    <mamdevqaWatchers>sewolf</mamdevqaWatchers>
+    <mamdevqaTimsato>p.msys.mailplattform</mamdevqaTimsato>
+    <mamdevqaDiffLink>
+      ${project.scm.url}/compare/${project.artifactId}-${ONOCurrentVersion}...${project.artifactId}-${releaseVersion}
+    </mamdevqaDiffLink>
+    <changes.announcementFile>qa-ticket.json</changes.announcementFile>
+    <projectVersionPolicyId>ONOChangesVersionPolicy</projectVersionPolicyId>
   </properties>
+
   <inceptionYear>2016</inceptionYear>
   <organization>
     <name>Talanlabs</name>
@@ -87,55 +95,25 @@
       <name>Jakub Vavrik</name>
     </contributor>
   </contributors>
+
   <scm>
-    <url>https://github.com/gabrie-allaigre/sonar-gitlab-plugin</url>
-    <connection>scm:git:https://github.com/gabrie-allaigre/sonar-gitlab-plugin.git</connection>
+    <connection>scm:git:https://git.mamdev.server.lan/sewolf/${project.artifactId}.git</connection>
+    <developerConnection>${project.scm.connection}</developerConnection>
+    <url>https://git.mamdev.server.lan/sewolf/sonar-gitlab-plugin</url>
+    <tag>HEAD</tag>
   </scm>
+
   <ciManagement>
-    <system>gitlab-ci</system>
-    <url>https://gitlab.talanlabs.com/gabriel-allaigre/sonar-gitlab-plugin/builds</url>
+    <system>GitLab</system>
+    <url>https://git.mamdev.server.lan/sewolf/${project.artifactId}/pipelines</url>
   </ciManagement>
+
   <issueManagement>
-    <system>github</system>
-    <url>https://github.com/gabrie-allaigre/sonar-gitlab-plugin/issues</url>
+    <system>JIRA</system>
+    <url>https://dp-jira.1and1.com/browse/DEVMMAIC</url>
   </issueManagement>
-  <repositories>
-    <repository>
-      <id>jitpack.io</id>
-      <url>https://jitpack.io</url>
-    </repository>
-  </repositories>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>${jacoco-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>pre-unit-test</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-            <configuration>
-              <destFile>${jacoco.ut.execution.data.file}</destFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>post-unit-test</id>
-            <phase>test</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <configuration>
-              <dataFile>${jacoco.ut.execution.data.file}</dataFile>
-              <outputDirectory>${project.reporting.outputDirectory}/jacoco-ut</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+
+
   <dependencies>
     <dependency>
       <groupId>org.sonarsource.sonarqube</groupId>
@@ -155,7 +133,7 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.github.gabrie-allaigre</groupId>
+      <groupId>com.talanlabs</groupId>
       <artifactId>java-gitlab-api</artifactId>
       <version>${java-gitlab-api.version}</version>
     </dependency>
